@@ -73,25 +73,45 @@ public class Ontology {
             { 0, CS_C_NULL } // CS_C_RESEARCHGROUP
     };
     /** class name strings */
-    public static final String[] CLASS_TOKEN = { "University", // CS_C_UNIV
-            "Department", // CS_C_DEPT
-            "Faculty", // CS_C_FACULTY
-            "Professor", // CS_C_PROF
-            "FullProfessor", // CS_C_FULLPROF
-            "AssociateProfessor", // CS_C_ASSOPROF
-            "AssistantProfessor", // CS_C_ASSTPROF
-            "Lecturer", // CS_C_LECTURER
-            "Student", // CS_C_STUDENT
-            "UndergraduateStudent", // CS_C_UNDERSTUD
-            "GraduateStudent", // CS_C_GRADSTUD
-            "TeachingAssistant", // CS_C_TA
-            "ResearchAssistant", // CS_C_RA
-            "Course", // CS_C_COURSE
-            "GraduateCourse", // CS_C_GRADCOURSE
-            "Publication", // CS_C_PUBLICATION
-            "Chair", // CS_C_CHAIR
-            "Research", // CS_C_RESEARCH
-            "ResearchGroup" // CS_C_RESEARCHGROUP
+    public static final String[] CLASS_TOKEN = {
+//            "University", // CS_C_UNIV
+//            "Department", // CS_C_DEPT
+//            "Faculty", // CS_C_FACULTY
+//            "Professor", // CS_C_PROF
+//            "FullProfessor", // CS_C_FULLPROF
+//            "AssociateProfessor", // CS_C_ASSOPROF
+//            "AssistantProfessor", // CS_C_ASSTPROF
+//            "Lecturer", // CS_C_LECTURER
+//            "Student", // CS_C_STUDENT
+//            "UndergraduateStudent", // CS_C_UNDERSTUD
+//            "GraduateStudent", // CS_C_GRADSTUD
+//            "TeachingAssistant", // CS_C_TA
+//            "ResearchAssistant", // CS_C_RA
+//            "Course", // CS_C_COURSE
+//            "GraduateCourse", // CS_C_GRADCOURSE
+//            "Publication", // CS_C_PUBLICATION
+//            "Chair", // CS_C_CHAIR
+//            "Research", // CS_C_RESEARCH
+//            "ResearchGroup" // CS_C_RESEARCHGROUP
+            "Site", //CS_C_UNIV
+            "Thread", //CS_C_DEPT
+            "PublicMember", //CS_C_FACULTY
+            "Influencer", //CS_C_PROF
+            "Star", //CS_C_FULLPROF
+            "Switch", //CS_C_ASSOPROF
+            "Commercial", //CS_C_ASSTPROF
+            "PublicActive", //CS_C_LECTURER
+            "StakeHolder", //CS_C_STUDENT
+            "UndergraduateStudent", //CS_C_UNDERSTUD
+            "Hipster", //CS_C_GRADSTUD
+            "Maven", //CS_C_TA
+            "GroupMember", //CS_C_RA
+            "Topic", //CS_C_COURSE
+            "TrendingTopic", //CS_C_GRADCOURSE
+            "Activity", //CS_C_PUBLICATION
+            "OpinionMaker", //CS_C_CHAIR
+            "Tag", //CS_C_RESEARCH
+            "Usergroup" //CS_C_RESEARCHGROUP
     };
     /** number of classes */
     public static final int CLASS_NUM = CLASS_INFO.length;
@@ -135,9 +155,12 @@ public class Ontology {
     /** worksFor */
     public static final int CS_P_WORKSFOR = CS_P_SUBORGANIZATIONOF + 1;
     /** property name strings */
-    public static final String[] PROP_TOKEN = { "name", "takesCourse", "teacherOf", "undergraduateDegreeFrom",
-            "mastersDegreeFrom", "doctoralDegreeFrom", "advisor", "memberOf", "publicationAuthor", "headOf",
-            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor" };
+//    public static final String[] PROP_TOKEN = { "name", "takesCourse", "teacherOf", "undergraduateDegreeFrom",
+//            "mastersDegreeFrom", "doctoralDegreeFrom", "advisor", "memberOf", "publicationAuthor", "headOf",
+//            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor" };
+    public static final String[] PROP_TOKEN = { "name", "postsAbout", "talksAbout", "hasRestrictedAccount",
+            "hasVerifiedAccount", "hasPremiumAccount", "isBeingInfluencedBy", "isMemberOf", "performedBy", "iHheadOf",
+            "isExpertAt", "isTagging", "emailAddress", "telephone", "isPartOf", "participates" };
     /** number of properties */
     public static final int PROP_NUM = PROP_TOKEN.length;
 
