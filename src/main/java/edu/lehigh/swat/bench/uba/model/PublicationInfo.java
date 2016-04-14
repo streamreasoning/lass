@@ -10,4 +10,6 @@ public class PublicationInfo {
     public String name;
     /** list of authors */
     public ArrayList<String> authors;
+
+    public int type;
 }

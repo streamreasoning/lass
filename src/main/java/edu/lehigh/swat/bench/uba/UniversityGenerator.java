@@ -1,19 +1,14 @@
 package edu.lehigh.swat.bench.uba;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-
+import edu.lehigh.swat.bench.uba.model.*;
+import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.lehigh.swat.bench.uba.model.CourseInfo;
-import edu.lehigh.swat.bench.uba.model.GenerationParameters;
-import edu.lehigh.swat.bench.uba.model.Ontology;
-import edu.lehigh.swat.bench.uba.model.PublicationInfo;
-import edu.lehigh.swat.bench.uba.model.RaInfo;
-import edu.lehigh.swat.bench.uba.model.TaInfo;
-import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Random;
 
 class UniversityGenerator implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(UniversityGenerator.class);
@@ -29,7 +24,7 @@ class UniversityGenerator implements Runnable {
             LOGGER.error("Some data generators have failed, skipping further data generation (University {})", this.univState.getUniversityIndex());
             return;
         }
-        
+
         try {
             _generateUniv(this.univState);
             this.univState.setComplete();
@@ -45,9 +40,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Creates a university.
-     * 
-     * @param index
-     *            Index of the university.
+     *
+     * @param index Index of the university.
      */
     private void _generateUniv(UniversityState univState) {
         // determine department number
@@ -62,13 +56,11 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Creates a department.
-     * 
-     * @param univIndex
-     *            Index of the current university.
-     * @param index
-     *            Index of the department. NOTE: Use univIndex instead of
-     *            instances[CS_C_UNIV].count till generateASection(CS_C_UNIV, )
-     *            is invoked.
+     *
+     * @param univIndex Index of the current university.
+     * @param index     Index of the department. NOTE: Use univIndex instead of
+     *                  instances[CS_C_UNIV].count till generateASection(CS_C_UNIV, )
+     *                  is invoked.
      */
     private void _generateDept(UniversityState univState, int index) {
         // Start a new file if we're not consolidating or this is the first
@@ -128,65 +120,62 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates an instance of the specified class
-     * 
-     * @param classType
-     *            Type of the instance.
-     * @param index
-     *            Index of the instance.
+     *
+     * @param classType Type of the instance.
+     * @param index     Index of the instance.
      */
     private void _generateASection(UniversityState state, int classType, int index) {
         _updateCount(state, classType);
 
         switch (classType) {
-        case Ontology.CS_C_UNIV:
-            _generateAUniv(state, index);
-            break;
-        case Ontology.CS_C_DEPT:
-            _generateADept(state, index);
-            break;
-        case Ontology.CS_C_FACULTY:
-            _generateAFaculty(state, index);
-            break;
-        case Ontology.CS_C_PROF:
-            _generateAProf(state, index);
-            break;
-        case Ontology.CS_C_FULLPROF:
-            _generateAFullProf(state, index);
-            break;
-        case Ontology.CS_C_ASSOPROF:
-            _generateAnAssociateProfessor(state, index);
-            break;
-        case Ontology.CS_C_ASSTPROF:
-            _generateAnAssistantProfessor(state, index);
-            break;
-        case Ontology.CS_C_LECTURER:
-            _generateALecturer(state, index);
-            break;
-        case Ontology.CS_C_UNDERSTUD:
-            _generateAnUndergraduateStudent(state, index);
-            break;
-        case Ontology.CS_C_GRADSTUD:
-            _generateAGradudateStudent(state, index);
-            break;
-        case Ontology.CS_C_COURSE:
-            _generateACourse(state, index);
-            break;
-        case Ontology.CS_C_GRADCOURSE:
-            _generateAGraduateCourse(state, index);
-            break;
-        case Ontology.CS_C_RESEARCHGROUP:
-            _generateAResearchGroup(state, index);
-            break;
-        default:
-            break;
+            case Ontology.CS_C_UNIV:
+                _generateAUniv(state, index);
+                break;
+            case Ontology.CS_C_DEPT:
+                _generateADept(state, index);
+                break;
+            case Ontology.CS_C_FACULTY:
+                _generateAFaculty(state, index);
+                break;
+            case Ontology.CS_C_PROF:
+                _generateAProf(state, index);
+                break;
+            case Ontology.CS_C_FULLPROF:
+                _generateAFullProf(state, index);
+                break;
+            case Ontology.CS_C_ASSOPROF:
+                _generateAnAssociateProfessor(state, index);
+                break;
+            case Ontology.CS_C_ASSTPROF:
+                _generateAnAssistantProfessor(state, index);
+                break;
+            case Ontology.CS_C_LECTURER:
+                _generateALecturer(state, index);
+                break;
+            case Ontology.CS_C_UNDERSTUD:
+                _generateAnUndergraduateStudent(state, index);
+                break;
+            case Ontology.CS_C_GRADSTUD:
+                _generateAGradudateStudent(state, index);
+                break;
+            case Ontology.CS_C_COURSE:
+                _generateACourse(state, index);
+                break;
+            case Ontology.CS_C_GRADCOURSE:
+                _generateAGraduateCourse(state, index);
+                break;
+            case Ontology.CS_C_RESEARCHGROUP:
+                _generateAResearchGroup(state, index);
+                break;
+            default:
+                break;
         }
     }
 
     /**
      * Generates a university instance.
-     * 
-     * @param index
-     *            Index of the instance.
+     *
+     * @param index Index of the instance.
      */
     private void _generateAUniv(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_UNIV, univState.getId(Ontology.CS_C_UNIV, index));
@@ -197,9 +186,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a department instance.
-     * 
-     * @param index
-     *            Index of the department.
+     *
+     * @param index Index of the department.
      */
     private void _generateADept(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_DEPT, univState.getId(Ontology.CS_C_DEPT, index));
@@ -212,9 +200,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a faculty instance.
-     * 
-     * @param index
-     *            Index of the faculty.
+     *
+     * @param index Index of the faculty.
      */
     private void _generateAFaculty(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_FACULTY, univState.getId(Ontology.CS_C_FACULTY, index));
@@ -224,11 +211,9 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates properties for the specified faculty instance.
-     * 
-     * @param type
-     *            Type of the faculty.
-     * @param index
-     *            Index of the instance within its type.
+     *
+     * @param type  Type of the faculty.
+     * @param index Index of the instance within its type.
      */
     private void _generateAFaculty_a(UniversityState univState, int type, int index) {
         int indexInFaculty;
@@ -270,9 +255,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Assigns an undergraduate course to the specified faculty.
-     * 
-     * @param indexInFaculty
-     *            Index of the faculty.
+     *
+     * @param indexInFaculty Index of the faculty.
      * @return Index of the selected course in the pool.
      */
     private int _AssignCourse(UniversityState univState, int indexInFaculty) {
@@ -296,9 +280,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Assigns a graduate course to the specified faculty.
-     * 
-     * @param indexInFaculty
-     *            Index of the faculty.
+     *
+     * @param indexInFaculty Index of the faculty.
      * @return Index of the selected course in the pool.
      */
     private int _AssignGraduateCourse(UniversityState univState, int indexInFaculty) {
@@ -322,9 +305,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a professor instance.
-     * 
-     * @param index
-     *            Index of the professor.
+     *
+     * @param index Index of the professor.
      */
     private void _generateAProf(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_PROF, univState.getId(Ontology.CS_C_PROF, index));
@@ -334,11 +316,9 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates properties for a professor instance.
-     * 
-     * @param type
-     *            Type of the professor.
-     * @param index
-     *            Index of the intance within its type.
+     *
+     * @param type  Type of the professor.
+     * @param index Index of the intance within its type.
      */
     private void _generateAProf_a(UniversityState univState, int type, int index) {
         _generateAFaculty_a(univState, type, index);
@@ -348,9 +328,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a full professor instances.
-     * 
-     * @param index
-     *            Index of the full professor.
+     *
+     * @param index Index of the full professor.
      */
     private void _generateAFullProf(UniversityState univState, int index) {
         String id;
@@ -369,9 +348,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates an associate professor instance.
-     * 
-     * @param index
-     *            Index of the associate professor.
+     *
+     * @param index Index of the associate professor.
      */
     private void _generateAnAssociateProfessor(UniversityState univState, int index) {
         String id = univState.getId(Ontology.CS_C_ASSOPROF, index);
@@ -384,9 +362,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates an assistant professor instance.
-     * 
-     * @param index
-     *            Index of the assistant professor.
+     *
+     * @param index Index of the assistant professor.
      */
     private void _generateAnAssistantProfessor(UniversityState univState, int index) {
         String id = univState.getId(Ontology.CS_C_ASSTPROF, index);
@@ -399,9 +376,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a lecturer instance.
-     * 
-     * @param index
-     *            Index of the lecturer.
+     *
+     * @param index Index of the lecturer.
      */
     private void _generateALecturer(UniversityState univState, int index) {
         String id = univState.getId(Ontology.CS_C_LECTURER, index);
@@ -413,25 +389,25 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Assigns publications to the specified faculty.
-     * 
-     * @param author
-     *            Id of the faculty
-     * @param min
-     *            Minimum number of publications
-     * @param max
-     *            Maximum number of publications
+     *
+     * @param author Id of the faculty
+     * @param min    Minimum number of publications
+     * @param max    Maximum number of publications
      */
     private void _assignFacultyPublications(UniversityState univState, String author, int min, int max) {
         int num;
         PublicationInfo publication;
+        Random r = new Random(univState.getSeed());
 
         num = univState.getRandomFromRange(min, max);
         for (int i = 0; i < num; i++) {
+            int type = r.nextInt(Ontology.CS_C_UNOFFICIAL_PUB - Ontology.CS_C_ARTICLE+ 1) + Ontology.CS_C_ARTICLE;
             publication = new PublicationInfo();
-            publication.id = univState.getId(Ontology.CS_C_PUBLICATION, i, author);
-            publication.name = univState.getRelativeName(Ontology.CS_C_PUBLICATION, i);
+            publication.id = univState.getId(type, i, author);
+            publication.name = univState.getRelativeName(type, i);
             publication.authors = new ArrayList<String>();
             publication.authors.add(author);
+            publication.type = type;
             univState.getPublications().add(publication);
         }
     }
@@ -439,13 +415,10 @@ class UniversityGenerator implements Runnable {
     /**
      * Assigns publications to the specified graduate student. The publications
      * are chosen from some faculties'.
-     * 
-     * @param author
-     *            Id of the graduate student.
-     * @param min
-     *            Minimum number of publications.
-     * @param max
-     *            Maximum number of publications.
+     *
+     * @param author Id of the graduate student.
+     * @param min    Minimum number of publications.
+     * @param max    Maximum number of publications.
      */
     private void _assignGraduateStudentPublications(UniversityState univState, String author, int min, int max) {
         int num;
@@ -471,27 +444,24 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a publication instance.
-     * 
-     * @param publication
-     *            Information of the publication.
+     *
+     * @param publication Information of the publication.
      */
     private void _generateAPublication(UniversityState univState, PublicationInfo publication) {
-        univState.getWriter().startSection(Ontology.CS_C_PUBLICATION, publication.id);
+        univState.getWriter().startSection(publication.type, publication.id);
         univState.getWriter().addProperty(Ontology.CS_P_NAME, publication.name, false);
         for (int i = 0; i < publication.authors.size(); i++) {
             univState.getWriter().addProperty(Ontology.CS_P_PUBLICATIONAUTHOR, (String) publication.authors.get(i),
                     true);
         }
-        univState.getWriter().endSection(Ontology.CS_C_PUBLICATION);
+        univState.getWriter().endSection(publication.type);
     }
 
     /**
      * Generates properties for the specified student instance.
-     * 
-     * @param type
-     *            Type of the student.
-     * @param index
-     *            Index of the instance within its type.
+     *
+     * @param type  Type of the student.
+     * @param index Index of the instance within its type.
      */
     private void _generateAStudent_a(UniversityState univState, int type, int index) {
         univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(type, index), false);
@@ -503,9 +473,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates an undergraduate student instance.
-     * 
-     * @param index
-     *            Index of the undergraduate student.
+     *
+     * @param index Index of the undergraduate student.
      */
     private void _generateAnUndergraduateStudent(UniversityState univState, int index) {
         int n;
@@ -529,9 +498,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a graduate student instance.
-     * 
-     * @param index
-     *            Index of the graduate student.
+     *
+     * @param index Index of the graduate student.
      */
     private void _generateAGradudateStudent(UniversityState univState, int index) {
         int n;
@@ -561,7 +529,7 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Select an advisor from the professors.
-     * 
+     *
      * @return Id of the selected professor.
      */
     private String _selectAdvisor(UniversityState univState) {
@@ -575,9 +543,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a TA instance according to the specified information.
-     * 
-     * @param ta
-     *            Information of the TA.
+     *
+     * @param ta Information of the TA.
      */
     private void _generateATa(UniversityState univState, TaInfo ta) {
         univState.getWriter().startAboutSection(Ontology.CS_C_TA,
@@ -589,9 +556,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates an RA instance according to the specified information.
-     * 
-     * @param ra
-     *            Information of the RA.
+     *
+     * @param ra Information of the RA.
      */
     private void _generateAnRa(UniversityState univState, RaInfo ra) {
         univState.getWriter().startAboutSection(Ontology.CS_C_RA,
@@ -601,9 +567,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a course instance.
-     * 
-     * @param index
-     *            Index of the course.
+     *
+     * @param index Index of the course.
      */
     private void _generateACourse(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_COURSE, univState.getId(Ontology.CS_C_COURSE, index));
@@ -614,9 +579,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a graduate course instance.
-     * 
-     * @param index
-     *            Index of the graduate course.
+     *
+     * @param index Index of the graduate course.
      */
     private void _generateAGraduateCourse(UniversityState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_GRADCOURSE, univState.getId(Ontology.CS_C_GRADCOURSE, index));
@@ -671,9 +635,8 @@ class UniversityGenerator implements Runnable {
 
     /**
      * Generates a research group instance.
-     * 
-     * @param index
-     *            Index of the research group.
+     *
+     * @param index Index of the research group.
      */
     private void _generateAResearchGroup(UniversityState univState, int index) {
         String id;
@@ -689,9 +652,8 @@ class UniversityGenerator implements Runnable {
     /**
      * Increases by 1 the instance count of the specified class. This also
      * includes the increase of the instance count of all its super class.
-     * 
-     * @param classType
-     *            Type of the instance.
+     *
+     * @param classType Type of the instance.
      */
     private void _updateCount(UniversityState univState, int classType) {
         int subClass, superClass;
@@ -712,7 +674,7 @@ class UniversityGenerator implements Runnable {
         int classInstNum = 0; // total class instance num in this department
         long totalClassInstNum = 0l; // total class instance num so far
         int propInstNum = 0; // total property instance num in this
-                             // department
+        // department
         long totalPropInstNum = 0l; // total property instance num so far
 
         Generator.LOGGER.debug("External Seed={} Interal Seed={}", univState.getGlobalState().getBaseSeed(),
