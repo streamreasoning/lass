@@ -11,8 +11,13 @@ public class GenerationParameters {
       public static final int GRAD_COURSE_NUM = 100; //must >= max faculty # * FACULTY_GRADCOURSE_MAX
     /** size of the pool of universities */
       public static final int UNIV_NUM = 1000;
-    /** size of the pool of reasearch areas */
-      public static final int RESEARCH_NUM = 30;
+    /** size of the pool of reasearch areas of one department*/
+    public static final int RESEARCH_NUM = 100;
+    /** size of the pool of reasearch areas of one department*/
+      public static final int RESEARCH_NUM_MIN = 30;
+    /** size of the pool of reasearch areas of one department*/
+
+     public static final int RESEARCH_NUM_MAX = 90;
     /** minimum number of departments in a university */
       public static final int DEPT_MIN = 15;
     /** maximum number of departments in a university */
@@ -46,6 +51,10 @@ public class GenerationParameters {
       public static final int FACULTY_GRADCOURSE_MIN = 1;
     /** maximum number of graduate courses taught by a faculty */
       public static final int FACULTY_GRADCOURSE_MAX = 2;
+    /** minimum number of research by a professor */
+    public static final int PROFESSOR_RESEARCH_MIN = 1;
+    /** maximum number of research by a professor */
+    public static final int PROFESSOR_RESEARCH_MAX = 2;
     /** minimum number of courses taken by a undergraduate student */
       public static final int UNDERSTUD_COURSE_MIN = 2;
     /** maximum number of courses taken by a undergraduate student */

@@ -41,7 +41,6 @@ class UniversityGenerator implements Runnable {
     /**
      * Creates a university.
      *
-     * @param index Index of the university.
      */
     private void _generateUniv(UniversityState univState) {
         // determine department number
@@ -57,7 +56,6 @@ class UniversityGenerator implements Runnable {
     /**
      * Creates a department.
      *
-     * @param univIndex Index of the current university.
      * @param index     Index of the department. NOTE: Use univIndex instead of
      *                  instances[CS_C_UNIV].count till generateASection(CS_C_UNIV, )
      *                  is invoked.
@@ -77,10 +75,10 @@ class UniversityGenerator implements Runnable {
             _generateASection(univState, Ontology.CS_C_UNIV, univState.getUniversityIndex());
         }
         _generateASection(univState, Ontology.CS_C_DEPT, index);
-        for (int i = Ontology.CS_C_DEPT + 1; i < Ontology.CLASS_NUM; i++) {
-            univState.getInstances()[i].count = 0;
-            for (int j = 0; j < univState.getInstances()[i].num; j++) {
-                _generateASection(univState, i, j);
+        for (int classType = Ontology.CS_C_DEPT + 1; classType < Ontology.CLASS_NUM; classType++) {
+            univState.getInstances()[classType].count = 0;
+            for (int instanceIndex = 0; instanceIndex < univState.getInstances()[classType].num; instanceIndex++) {
+                _generateASection(univState, classType, instanceIndex);
             }
         }
 
@@ -134,7 +132,7 @@ class UniversityGenerator implements Runnable {
             case Ontology.CS_C_DEPT:
                 _generateADept(state, index);
                 break;
-            case Ontology.CS_C_FACULTY:
+            case Ontology.CS_C_FACULTY: //do not generate Facutly, reused later on.
                 _generateAFaculty(state, index);
                 break;
             case Ontology.CS_C_PROF:
@@ -222,7 +220,6 @@ class UniversityGenerator implements Runnable {
 
         indexInFaculty = univState.getInstances()[Ontology.CS_C_FACULTY].count - 1;
 
-        univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(type, index), false);
 
         // undergradutate courses
         courseNum = univState.getRandomFromRange(GenerationParameters.FACULTY_COURSE_MIN,
@@ -251,6 +248,8 @@ class UniversityGenerator implements Runnable {
                 univState.getId(Ontology.CS_C_DEPT, univState.getInstances()[Ontology.CS_C_DEPT].count - 1), true);
         univState.getWriter().addProperty(Ontology.CS_P_EMAIL, univState.getEmail(type, index), false);
         univState.getWriter().addProperty(Ontology.CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
+        univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(type, index), false);
+
     }
 
     /**
@@ -322,8 +321,33 @@ class UniversityGenerator implements Runnable {
      */
     private void _generateAProf_a(UniversityState univState, int type, int index) {
         _generateAFaculty_a(univState, type, index);
-        univState.getWriter().addProperty(Ontology.CS_P_RESEARCHINTEREST, univState.getRelativeName(
-                Ontology.CS_C_RESEARCH, univState.getRandom(GenerationParameters.RESEARCH_NUM)), false);
+
+        int researchNum = univState.getRandomFromRange(GenerationParameters.PROFESSOR_RESEARCH_MIN,
+                GenerationParameters.PROFESSOR_RESEARCH_MAX);
+        for (int i = 0; i < researchNum; i++) {
+            int researchIndex = _AssignResearch(univState, index);
+            univState.getWriter().addProperty(Ontology.CS_P_RESEARCHINTEREST,
+                    univState.getId(Ontology.CS_C_RESEARCH, researchIndex), true);
+        }
+
+    }
+
+    private int _AssignResearch(UniversityState univState, int indexInFaculty) {
+        // NOTE: this line, although overriden by the next one, is
+        // deliberately
+        // kept
+        // to guarantee identical random number generation to the previous
+        // version.
+        int pos = 0;
+
+        ResearchInfo research = new ResearchInfo();
+        research.indexInFaculty = indexInFaculty;
+        research.globalIndex = ((Integer) univState.getRemainingResearches().get(pos)).intValue();
+        univState.getResearches().add(research);
+
+        univState.getRemainingResearches().remove(pos);
+
+        return research.globalIndex;
     }
 
     /**
@@ -409,26 +433,6 @@ class UniversityGenerator implements Runnable {
             publication.authors.add(author);
             publication.type = type;
             univState.getPublications().add(publication);
-        }
-    }
-
-    /**
-     * Assigns publications to the specified graduate student. The publications
-     * are chosen from some faculties'.
-     *
-     * @param author Id of the graduate student.
-     * @param min    Minimum number of publications.
-     * @param max    Maximum number of publications.
-     */
-    private void _assignGraduateStudentPublications(UniversityState univState, String author, int min, int max) {
-        int num;
-        PublicationInfo publication;
-
-        num = univState.getRandomFromRange(min, max);
-        ArrayList<Integer> list = univState.getRandomList(num, 0, univState.getPublications().size() - 1);
-        for (int i = 0; i < list.size(); i++) {
-            publication = (PublicationInfo) univState.getPublications().get(list.get(i).intValue());
-            publication.authors.add(author);
         }
     }
 
@@ -539,6 +543,26 @@ class UniversityGenerator implements Runnable {
         profType = univState.getRandomFromRange(Ontology.CS_C_FULLPROF, Ontology.CS_C_ASSTPROF);
         index = univState.getRandom(univState.getInstances()[profType].total);
         return univState.getId(profType, index);
+    }
+
+    /**
+     * Assigns publications to the specified graduate student. The publications
+     * are chosen from some faculties'.
+     *
+     * @param author Id of the graduate student.
+     * @param min    Minimum number of publications.
+     * @param max    Maximum number of publications.
+     */
+    private void _assignGraduateStudentPublications(UniversityState univState, String author, int min, int max) {
+        int num;
+        PublicationInfo publication;
+
+        num = univState.getRandomFromRange(min, max);
+        ArrayList<Integer> list = univState.getRandomList(num, 0, univState.getPublications().size() - 1);
+        for (int i = 0; i < list.size(); i++) {
+            publication = (PublicationInfo) univState.getPublications().get(list.get(i).intValue());
+            publication.authors.add(author);
+        }
     }
 
     /**

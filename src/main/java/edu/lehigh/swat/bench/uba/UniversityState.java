@@ -3,12 +3,8 @@ package edu.lehigh.swat.bench.uba;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
-import edu.lehigh.swat.bench.uba.model.CourseInfo;
-import edu.lehigh.swat.bench.uba.model.GenerationParameters;
-import edu.lehigh.swat.bench.uba.model.InstanceCount;
-import edu.lehigh.swat.bench.uba.model.Ontology;
-import edu.lehigh.swat.bench.uba.model.PropertyCount;
-import edu.lehigh.swat.bench.uba.model.PublicationInfo;
+
+import edu.lehigh.swat.bench.uba.model.*;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.DamlWriter;
 import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
@@ -52,6 +48,17 @@ public class UniversityState implements GeneratorCallbackTarget {
      */
     private final ArrayList<Integer> remainingGradCourses;
     /**
+     * list of researches instances generated so far (in the current
+     * department)
+     */
+    private final ArrayList<ResearchInfo> researches;
+
+    /**
+     * list of remaning available researches instances generated (in the current
+     * department)
+     */
+    private final ArrayList<Integer> remaningResearches;
+    /**
      * list of publication instances generated so far (in the current
      * department)
      */
@@ -84,8 +91,10 @@ public class UniversityState implements GeneratorCallbackTarget {
         gradCourses = new ArrayList<CourseInfo>();
         remainingUnderCourses = new ArrayList<Integer>();
         remainingGradCourses = new ArrayList<Integer>();
-        publications = new ArrayList<PublicationInfo>();
+        remaningResearches=new ArrayList<Integer>();
 
+        publications = new ArrayList<PublicationInfo>();
+        researches = new ArrayList<ResearchInfo>();
         switch (state.getWriterType()) {
         case OWL:
             writer = new OwlWriter(this, state.getOntologyUrl());
@@ -415,14 +424,22 @@ public class UniversityState implements GeneratorCallbackTarget {
         this.resetInstanceInfo();
         underCourses.clear();
         gradCourses.clear();
+        researches.clear();
         remainingUnderCourses.clear();
         remainingGradCourses.clear();
+        remaningResearches.clear();
         for (int i = 0; i < GenerationParameters.UNDER_COURSE_NUM; i++) {
             remainingUnderCourses.add(new Integer(i));
         }
         for (int i = 0; i < GenerationParameters.GRAD_COURSE_NUM; i++) {
             remainingGradCourses.add(new Integer(i));
         }
+
+        for (int i = 0; i < GenerationParameters.RESEARCH_NUM; i++) {
+            remaningResearches.add(new Integer(i));
+        }
+
+
         publications.clear();
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
             this.instances[i].logNum = 0;
@@ -486,6 +503,10 @@ public class UniversityState implements GeneratorCallbackTarget {
                 this.instances[i].num = getRandomFromRange(GenerationParameters.RESEARCHGROUP_MIN,
                         GenerationParameters.RESEARCHGROUP_MAX);
                 break;
+            case Ontology.CS_C_RESEARCH:
+                    this.instances[i].num = getRandomFromRange(GenerationParameters.RESEARCH_NUM_MIN,
+                            GenerationParameters.RESEARCH_NUM_MAX);
+                    break;
             default:
                 this.instances[i].num = Ontology.CLASS_INFO[i][Ontology.INDEX_NUM];
                 break;
@@ -525,5 +546,13 @@ public class UniversityState implements GeneratorCallbackTarget {
 
     public ArrayList<Integer> getRemainingGradCourses() {
         return this.remainingGradCourses;
+    }
+
+    public ArrayList<Integer> getRemainingResearches() {
+        return this.remaningResearches;
+    }
+
+    public ArrayList<ResearchInfo> getResearches() {
+        return this.researches;
     }
 }
