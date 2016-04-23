@@ -9,7 +9,9 @@ public class PublicationInfo {
     /** name */
     public String name;
     /** list of authors */
-    public ArrayList<String> authors;
+    public String author;
+    /** list of other authors */
+    public ArrayList<String> mentions;
 
     public int type;
 

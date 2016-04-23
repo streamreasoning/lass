@@ -64,21 +64,21 @@ public class Ontology {
      */
     public static final int CS_C_RA = CS_C_TA + 1;
     /**
+     * Chair
+     */
+    public static final int CS_C_CHAIR = CS_C_RA + 1;
+    /**
      * Course
      */
-    public static final int CS_C_COURSE = CS_C_RA + 1;
+    public static final int CS_C_COURSE = CS_C_CHAIR + 1;
     /**
      * GraduateCourse
      */
     public static final int CS_C_GRADCOURSE = CS_C_COURSE + 1;
     /**
-     * Chair
-     */
-    public static final int CS_C_CHAIR = CS_C_GRADCOURSE + 1;
-    /**
      * Research
      */
-    public static final int CS_C_RESEARCH = CS_C_CHAIR + 1;
+    public static final int CS_C_RESEARCH = CS_C_GRADCOURSE + 1;
     /**
      * ResearchGroup
      */
@@ -147,9 +147,10 @@ public class Ontology {
             {0, CS_C_STUDENT}, // CS_C_GRADSTUD
             {0, CS_C_NULL}, // CS_C_TA
             {0, CS_C_NULL}, // CS_C_RA
+
+            {0, CS_C_NULL}, // CS_C_CHAIR
             {0, CS_C_NULL}, // CS_C_COURSE, treated as undergrad course here
             {0, CS_C_NULL}, // CS_C_GRADCOURSE
-            {0, CS_C_NULL}, // CS_C_CHAIR
             {0, CS_C_NULL}, // CS_C_RESEARCH
             {0, CS_C_NULL}, // CS_C_RESEARCHGROUP
             {0, CS_C_NULL}, // CS_C_PUBLICATION
@@ -179,9 +180,9 @@ public class Ontology {
             "GraduateStudent", // CS_C_GRADSTUD
             "TeachingAssistant", // CS_C_TA
             "ResearchAssistant", // CS_C_RA
+            "Chair", // CS_C_CHAIR
             "Course", // CS_C_COURSE
             "GraduateCourse", // CS_C_GRADCOURSE
-            "Chair", // CS_C_CHAIR
             "Research", // CS_C_RESEARCH
             "ResearchGroup", // CS_C_RESEARCHGROUP
             "Publication", // CS_C_PUBLICATION
@@ -248,9 +249,14 @@ public class Ontology {
      */
     public static final int CS_P_PUBLICATIONAUTHOR = CS_P_MEMBEROF + 1;
     /**
+     * publicationAuthor
+     */
+    public static final int CS_P_CONTAINS = CS_P_PUBLICATIONAUTHOR + 1;
+
+    /**
      * headOf
      */
-    public static final int CS_P_HEADOF = CS_P_PUBLICATIONAUTHOR + 1;
+    public static final int CS_P_HEADOF = CS_P_CONTAINS + 1;
     /**
      * teachingAssistantOf
      */
@@ -276,17 +282,31 @@ public class Ontology {
      */
     public static final int CS_P_WORKSFOR = CS_P_SUBORGANIZATIONOF + 1;
 
-    /*
+    /**
     * publicationResearch
-    * */
+    **/
     public static final int CS_P_PUBLICATION_RESEARCH = CS_P_WORKSFOR + 1;
+    /**
+     * softwareDocumentation
+     **/
+    public static final int CS_P_SOFTWARE_DOCUMENTATION = CS_P_PUBLICATION_RESEARCH + 1;
+
+    /**
+     *  softwareVersion
+     **/
+    public static final int CS_P_SOFTWARE_VERSION = CS_P_SOFTWARE_DOCUMENTATION + 1;
+
+    /**
+     * researchProject
+     **/
+    public static final int CS_P_RESEARCH_PROJECT = CS_P_SOFTWARE_VERSION + 1;
 
     /**
      * property name strings
      */
     public static final String[] PROP_TOKEN = {"name", "takesCourse", "teacherOf", "undergraduateDegreeFrom",
-            "mastersDegreeFrom", "doctoralDegreeFrom", "advisor", "memberOf", "publicationAuthor", "headOf",
-            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor", "publicationResearch"};
+            "mastersDegreeFrom", "doctoralDegreeFrom", "advisor", "memberOf", "publicationAuthor", "contains", "headOf",
+            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor", "publicationResearch", "softwareDocumentation","softwareVersion" ,"researchProject"};
     /**
      * number of properties
      */

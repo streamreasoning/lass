@@ -90,13 +90,13 @@ public class GenerationParameters {
     /** maximum number of lecturers in a department*/
       public static final int LEC_MAX = 7;
     /** minimum ratio of undergraduate students to faculties in a department*/
-      public static final int R_UNDERSTUD_FACULTY_MIN = 8;
+      public static final int R_UNDERSTUD_FACULTY_MIN = 1;
     /** maximum ratio of undergraduate students to faculties in a department*/
-      public static final int R_UNDERSTUD_FACULTY_MAX = 14;
+      public static final int R_UNDERSTUD_FACULTY_MAX = 1;
     /** minimum ratio of graduate students to faculties in a department*/
-      public static final int R_GRADSTUD_FACULTY_MIN = 3;
+      public static final int R_GRADSTUD_FACULTY_MIN = 1;
     /** maximum ratio of graduate students to faculties in a department*/
-      public static final int R_GRADSTUD_FACULTY_MAX = 4;
+      public static final int R_GRADSTUD_FACULTY_MAX = 1;
     //MUST: FACULTY_COURSE_MIN >= R_GRADSTUD_FACULTY_MAX / R_GRADSTUD_TA_MIN;
       /** minimum ratio of graduate students to TA in a department */
       public static final int R_GRADSTUD_TA_MIN = 4;

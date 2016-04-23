@@ -132,10 +132,10 @@ class UniversityGenerator implements Runnable {
             case Ontology.CS_C_DEPT:
                 _generateADept(state, index);
                 break;
-            case Ontology.CS_C_FACULTY: //do not generate Facutly, reused later on.
+            case Ontology.CS_C_FACULTY: //used only in recursion
                 _generateAFaculty(state, index);
                 break;
-            case Ontology.CS_C_PROF:
+            case Ontology.CS_C_PROF: //used only in recursion
                 _generateAProf(state, index);
                 break;
             case Ontology.CS_C_FULLPROF:
@@ -251,7 +251,10 @@ class UniversityGenerator implements Runnable {
         univState.getWriter().addProperty(Ontology.CS_P_EMAIL, univState.getEmail(type, index), false);
         univState.getWriter().addProperty(Ontology.CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
         univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(type, index), false);
-
+        if (index == univState.getChair().id && type == univState.getChair().type) {
+            univState.getWriter().addProperty(Ontology.CS_P_HEADOF,
+                    univState.getId(Ontology.CS_C_DEPT, univState.getInstances()[Ontology.CS_C_DEPT].count - 1), true);
+        }//TODO move in a general position
     }
 
     /**
@@ -355,15 +358,9 @@ class UniversityGenerator implements Runnable {
      * @param index Index of the full professor.
      */
     private void _generateAFullProf(UniversityState univState, int index) {
-        String id;
-
-        id = univState.getId(Ontology.CS_C_FULLPROF, index);
+        String id = univState.getId(Ontology.CS_C_FULLPROF, index);
         univState.getWriter().startSection(Ontology.CS_C_FULLPROF, id);
         int[] researches =_generateAProf_a(univState, Ontology.CS_C_FULLPROF, index);
-        if (index == univState.getChair()) {
-            univState.getWriter().addProperty(Ontology.CS_P_HEADOF,
-                    univState.getId(Ontology.CS_C_DEPT, univState.getInstances()[Ontology.CS_C_DEPT].count - 1), true);
-        }
         univState.getWriter().endSection(Ontology.CS_C_FULLPROF);
 
         _assignFacultyPublications(univState, id, GenerationParameters.FULLPROF_PUB_MIN,
@@ -404,7 +401,7 @@ class UniversityGenerator implements Runnable {
      * @param index Index of the lecturer.
      */
     private void _generateALecturer(UniversityState univState, int index) {
-                String id = univState.getId(Ontology.CS_C_LECTURER, index);
+      String id = univState.getId(Ontology.CS_C_LECTURER, index);
         univState.getWriter().startSection(Ontology.CS_C_LECTURER, id);
         _generateAFaculty_a(univState, Ontology.CS_C_LECTURER, index);
         univState.getWriter().endSection(Ontology.CS_C_LECTURER);
@@ -442,8 +439,8 @@ class UniversityGenerator implements Runnable {
             publication = new PublicationInfo();
             publication.id = univState.getId(type, i, author);
             publication.name = univState.getRelativeName(type, i);
-            publication.authors = new ArrayList<String>();
-            publication.authors.add(author);
+            publication.mentions = new ArrayList<String>();
+            publication.author=author;
             publication.type = type;
             publication.researches = researches;
             univState.getPublications().add(publication);
@@ -475,8 +472,12 @@ class UniversityGenerator implements Runnable {
                     true);
         }
 
-        for (int i = 0; i < publication.authors.size(); i++) {
-            univState.getWriter().addProperty(Ontology.CS_P_PUBLICATIONAUTHOR, (String) publication.authors.get(i),
+        univState.getWriter().addProperty(Ontology.CS_P_PUBLICATIONAUTHOR, (String) publication.author,
+                true);
+
+        for (int i = 0; i < publication.mentions.size(); i++) {
+
+            univState.getWriter().addProperty(Ontology.CS_P_CONTAINS, (String) publication.mentions.get(i),
                     true);
 
         }
@@ -547,7 +548,7 @@ class UniversityGenerator implements Runnable {
                 univState.getId(Ontology.CS_C_UNIV, univState.getRandom(GenerationParameters.UNIV_NUM)));
         if (0 == univState.getRandom(GenerationParameters.R_GRADSTUD_ADVISOR)) {
             univState.getWriter().addProperty(Ontology.CS_P_ADVISOR, _selectAdvisor(univState), true);
-        }
+        }//TODO move to a upper generation where anybody can have an advisor
         _assignGraduateStudentPublications(univState, id, GenerationParameters.GRADSTUD_PUB_MIN,
                 GenerationParameters.GRADSTUD_PUB_MAX);
         univState.getWriter().endSection(Ontology.CS_C_GRADSTUD);
@@ -583,7 +584,7 @@ class UniversityGenerator implements Runnable {
         ArrayList<Integer> list = univState.getRandomList(num, 0, univState.getPublications().size() - 1);
         for (int i = 0; i < list.size(); i++) {
             publication = (PublicationInfo) univState.getPublications().get(list.get(i).intValue());
-            publication.authors.add(author);
+            publication.mentions.add(author);
         }
     }
 
@@ -698,6 +699,13 @@ class UniversityGenerator implements Runnable {
         univState.getWriter().startSection(Ontology.CS_C_RESEARCHGROUP, id);
         univState.getWriter().addProperty(Ontology.CS_P_SUBORGANIZATIONOF,
                 univState.getId(Ontology.CS_C_DEPT, univState.getInstances()[Ontology.CS_C_DEPT].count - 1), true);
+
+        ResearchInfo research = univState.getResearches().get(univState.getRandom(univState.getResearches().size()-1));
+       //TODO add random boolean to make this optional rather then sure
+
+        univState.getWriter().addProperty(Ontology.CS_P_RESEARCH_PROJECT,
+                univState.getId(Ontology.CS_C_RESEARCH, research.globalIndex), true);
+
         univState.getWriter().endSection(Ontology.CS_C_RESEARCHGROUP);
     }
 

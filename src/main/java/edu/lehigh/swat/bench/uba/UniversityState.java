@@ -66,7 +66,7 @@ public class UniversityState implements GeneratorCallbackTarget {
     /**
      * index of the full professor who has been chosen as the department chair
      */
-    private int chair;
+    private ChairInfo chair;
 
     private Writer writer;
     private boolean completed = false;
@@ -77,6 +77,8 @@ public class UniversityState implements GeneratorCallbackTarget {
         this.index = index;
         this.seed = state.getBaseSeed() * (Integer.MAX_VALUE + 1) + index;
         this.random = new Random(seed);
+
+        this.chair = new ChairInfo();
 
         this.instances = new InstanceCount[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
@@ -155,12 +157,8 @@ public class UniversityState implements GeneratorCallbackTarget {
         return this.index;
     }
 
-    public int getChair() {
+    public ChairInfo getChair() {
         return this.chair;
-    }
-
-    public void setChair(int chair) {
-        this.chair = chair;
     }
 
     public Writer getWriter() {
@@ -437,6 +435,10 @@ public class UniversityState implements GeneratorCallbackTarget {
         return random.nextInt(max);
     }
 
+    public boolean getBoolean() {
+        return random.nextBoolean();
+    }
+
     public void reset() {
         this.resetInstanceInfo();
         underCourses.clear();
@@ -462,7 +464,8 @@ public class UniversityState implements GeneratorCallbackTarget {
         }
 
         // decide the chair
-        chair = this.random.nextInt(this.instances[Ontology.CS_C_FULLPROF].total);
+        chair.type = this.getRandomFromRange(Ontology.CS_C_FULLPROF,Ontology.CS_C_RA);
+        chair.id = this.random.nextInt(this.instances[chair.type].total);
     }
 
     /**
