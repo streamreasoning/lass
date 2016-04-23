@@ -12,4 +12,6 @@ public class PublicationInfo {
     public ArrayList<String> authors;
 
     public int type;
+
+    public int[] researches;
 }

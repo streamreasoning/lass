@@ -275,12 +275,18 @@ public class Ontology {
      * worksFor
      */
     public static final int CS_P_WORKSFOR = CS_P_SUBORGANIZATIONOF + 1;
+
+    /*
+    * publicationResearch
+    * */
+    public static final int CS_P_PUBLICATION_RESEARCH = CS_P_WORKSFOR + 1;
+
     /**
      * property name strings
      */
     public static final String[] PROP_TOKEN = {"name", "takesCourse", "teacherOf", "undergraduateDegreeFrom",
             "mastersDegreeFrom", "doctoralDegreeFrom", "advisor", "memberOf", "publicationAuthor", "headOf",
-            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor"};
+            "teachingAssistantOf", "researchInterest", "emailAddress", "telephone", "subOrganizationOf", "worksFor", "publicationResearch"};
     /**
      * number of properties
      */

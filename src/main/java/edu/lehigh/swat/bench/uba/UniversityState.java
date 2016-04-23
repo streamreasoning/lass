@@ -1,8 +1,7 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 import edu.lehigh.swat.bench.uba.model.*;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
@@ -11,6 +10,7 @@ import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
 import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class UniversityState implements GeneratorCallbackTarget {
 
@@ -416,6 +416,23 @@ public class UniversityState implements GeneratorCallbackTarget {
         return min + random.nextInt(max - min + 1);
     }
 
+    public int[] getRandomRange(int size, int min, int max) {
+
+        Set<Integer> ret = new HashSet<Integer>();
+        while(ret.size()!=size){
+            ret.add(new Integer(random.nextInt(max - min + 1)+min));
+        }
+
+        Integer[] integers = ret.toArray(new Integer[size]);
+        int[] arr = new int[ret.size()];
+
+        for(int i=0;i<size;i++){
+            arr[i]=integers[i].intValue();
+        }
+
+        return arr;
+    }
+
     public int getRandom(int max) {
         return random.nextInt(max);
     }
@@ -427,7 +444,7 @@ public class UniversityState implements GeneratorCallbackTarget {
         researches.clear();
         remainingUnderCourses.clear();
         remainingGradCourses.clear();
-        remaningResearches.clear();
+
         for (int i = 0; i < GenerationParameters.UNDER_COURSE_NUM; i++) {
             remainingUnderCourses.add(new Integer(i));
         }
@@ -435,12 +452,8 @@ public class UniversityState implements GeneratorCallbackTarget {
             remainingGradCourses.add(new Integer(i));
         }
 
-        for (int i = 0; i < GenerationParameters.RESEARCH_NUM; i++) {
-            remaningResearches.add(new Integer(i));
-        }
-
-
         publications.clear();
+
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
             this.instances[i].logNum = 0;
         }
@@ -504,9 +517,9 @@ public class UniversityState implements GeneratorCallbackTarget {
                         GenerationParameters.RESEARCHGROUP_MAX);
                 break;
             case Ontology.CS_C_RESEARCH:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.RESEARCH_NUM_MIN,
-                            GenerationParameters.RESEARCH_NUM_MAX);
-                    break;
+                this.instances[i].num = getRandomFromRange(GenerationParameters.RESEARCH_NUM_MIN,
+                        GenerationParameters.RESEARCH_NUM_MAX);
+                break;
             default:
                 this.instances[i].num = Ontology.CLASS_INFO[i][Ontology.INDEX_NUM];
                 break;

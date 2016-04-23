@@ -165,6 +165,8 @@ class UniversityGenerator implements Runnable {
             case Ontology.CS_C_RESEARCHGROUP:
                 _generateAResearchGroup(state, index);
                 break;
+            case Ontology.CS_C_RESEARCH:
+                _generateAResearch(univState, index);
             default:
                 break;
         }
@@ -319,33 +321,30 @@ class UniversityGenerator implements Runnable {
      * @param type  Type of the professor.
      * @param index Index of the intance within its type.
      */
-    private void _generateAProf_a(UniversityState univState, int type, int index) {
+    private int[] _generateAProf_a(UniversityState univState, int type, int index) {
         _generateAFaculty_a(univState, type, index);
 
         int researchNum = univState.getRandomFromRange(GenerationParameters.PROFESSOR_RESEARCH_MIN,
-                GenerationParameters.PROFESSOR_RESEARCH_MAX);
+                    GenerationParameters.PROFESSOR_RESEARCH_MAX);
+
+        int[] researches = new int[researchNum];
+
         for (int i = 0; i < researchNum; i++) {
-            int researchIndex = _AssignResearch(univState, index);
+            //TODO it is possible that you have twice the same research interest
+            researches[i] = _AssignResearch(univState, index);
             univState.getWriter().addProperty(Ontology.CS_P_RESEARCHINTEREST,
-                    univState.getId(Ontology.CS_C_RESEARCH, researchIndex), true);
+                    univState.getId(Ontology.CS_C_RESEARCH, researches[i]), true);
         }
+
+        return researches;
 
     }
 
     private int _AssignResearch(UniversityState univState, int indexInFaculty) {
-        // NOTE: this line, although overriden by the next one, is
-        // deliberately
-        // kept
-        // to guarantee identical random number generation to the previous
-        // version.
-        int pos = 0;
-
         ResearchInfo research = new ResearchInfo();
         research.indexInFaculty = indexInFaculty;
-        research.globalIndex = ((Integer) univState.getRemainingResearches().get(pos)).intValue();
+        research.globalIndex = univState.getRandom(univState.getInstances()[Ontology.CS_C_RESEARCH].num);
         univState.getResearches().add(research);
-
-        univState.getRemainingResearches().remove(pos);
 
         return research.globalIndex;
     }
@@ -360,14 +359,15 @@ class UniversityGenerator implements Runnable {
 
         id = univState.getId(Ontology.CS_C_FULLPROF, index);
         univState.getWriter().startSection(Ontology.CS_C_FULLPROF, id);
-        _generateAProf_a(univState, Ontology.CS_C_FULLPROF, index);
+        int[] researches =_generateAProf_a(univState, Ontology.CS_C_FULLPROF, index);
         if (index == univState.getChair()) {
             univState.getWriter().addProperty(Ontology.CS_P_HEADOF,
                     univState.getId(Ontology.CS_C_DEPT, univState.getInstances()[Ontology.CS_C_DEPT].count - 1), true);
         }
         univState.getWriter().endSection(Ontology.CS_C_FULLPROF);
+
         _assignFacultyPublications(univState, id, GenerationParameters.FULLPROF_PUB_MIN,
-                GenerationParameters.FULLPROF_PUB_MAX);
+                GenerationParameters.FULLPROF_PUB_MAX, researches);
     }
 
     /**
@@ -378,10 +378,10 @@ class UniversityGenerator implements Runnable {
     private void _generateAnAssociateProfessor(UniversityState univState, int index) {
         String id = univState.getId(Ontology.CS_C_ASSOPROF, index);
         univState.getWriter().startSection(Ontology.CS_C_ASSOPROF, id);
-        _generateAProf_a(univState, Ontology.CS_C_ASSOPROF, index);
+        int[] researches = _generateAProf_a(univState, Ontology.CS_C_ASSOPROF, index);
         univState.getWriter().endSection(Ontology.CS_C_ASSOPROF);
         _assignFacultyPublications(univState, id, GenerationParameters.ASSOPROF_PUB_MIN,
-                GenerationParameters.ASSOPROF_PUB_MAX);
+                GenerationParameters.ASSOPROF_PUB_MAX, researches);
     }
 
     /**
@@ -392,10 +392,10 @@ class UniversityGenerator implements Runnable {
     private void _generateAnAssistantProfessor(UniversityState univState, int index) {
         String id = univState.getId(Ontology.CS_C_ASSTPROF, index);
         univState.getWriter().startSection(Ontology.CS_C_ASSTPROF, id);
-        _generateAProf_a(univState, Ontology.CS_C_ASSTPROF, index);
+        int[] researches  = _generateAProf_a(univState, Ontology.CS_C_ASSTPROF, index);
         univState.getWriter().endSection(Ontology.CS_C_ASSTPROF);
         _assignFacultyPublications(univState, id, GenerationParameters.ASSTPROF_PUB_MIN,
-                GenerationParameters.ASSTPROF_PUB_MAX);
+                GenerationParameters.ASSTPROF_PUB_MAX, researches);
     }
 
     /**
@@ -404,11 +404,25 @@ class UniversityGenerator implements Runnable {
      * @param index Index of the lecturer.
      */
     private void _generateALecturer(UniversityState univState, int index) {
-        String id = univState.getId(Ontology.CS_C_LECTURER, index);
+                String id = univState.getId(Ontology.CS_C_LECTURER, index);
         univState.getWriter().startSection(Ontology.CS_C_LECTURER, id);
         _generateAFaculty_a(univState, Ontology.CS_C_LECTURER, index);
         univState.getWriter().endSection(Ontology.CS_C_LECTURER);
-        _assignFacultyPublications(univState, id, GenerationParameters.LEC_PUB_MIN, GenerationParameters.LEC_PUB_MAX);
+
+        int researchNum = univState.getRandomFromRange(GenerationParameters.PROFESSOR_RESEARCH_MIN,
+                GenerationParameters.PROFESSOR_RESEARCH_MAX);
+
+        int[] researches = new int[researchNum];
+
+        for (int i = 0; i < researchNum; i++) {
+            //TODO it is possible that you have twice the same research interest
+            researches[i] = _AssignResearch(univState, index);
+            univState.getWriter().addProperty(Ontology.CS_P_RESEARCHINTEREST,
+                    univState.getId(Ontology.CS_C_RESEARCH, researches[i]), true);
+        }
+
+        _assignFacultyPublications(univState, id, GenerationParameters.LEC_PUB_MIN, GenerationParameters.LEC_PUB_MAX, researches);
+
     }
 
     /**
@@ -418,20 +432,20 @@ class UniversityGenerator implements Runnable {
      * @param min    Minimum number of publications
      * @param max    Maximum number of publications
      */
-    private void _assignFacultyPublications(UniversityState univState, String author, int min, int max) {
+    private void _assignFacultyPublications(UniversityState univState, String author, int min, int max, int[] researches) {
         int num;
         PublicationInfo publication;
-        Random r = new Random(univState.getSeed());
 
-        num = univState.getRandomFromRange(min, max);
+        num = univState.getRandomFromRange(min,max);
         for (int i = 0; i < num; i++) {
-            int type = r.nextInt(Ontology.CS_C_UNOFFICIAL_PUB - Ontology.CS_C_ARTICLE+ 1) + Ontology.CS_C_ARTICLE;
+            int type = univState.getRandomFromRange(Ontology.CS_C_ARTICLE+ 1,Ontology.CS_C_UNOFFICIAL_PUB);
             publication = new PublicationInfo();
             publication.id = univState.getId(type, i, author);
             publication.name = univState.getRelativeName(type, i);
             publication.authors = new ArrayList<String>();
             publication.authors.add(author);
             publication.type = type;
+            publication.researches = researches;
             univState.getPublications().add(publication);
         }
     }
@@ -454,9 +468,17 @@ class UniversityGenerator implements Runnable {
     private void _generateAPublication(UniversityState univState, PublicationInfo publication) {
         univState.getWriter().startSection(publication.type, publication.id);
         univState.getWriter().addProperty(Ontology.CS_P_NAME, publication.name, false);
+
+
+        for(int i : publication.researches){
+            univState.getWriter().addProperty(Ontology.CS_P_PUBLICATION_RESEARCH,  univState.getId(Ontology.CS_C_RESEARCH, i),
+                    true);
+        }
+
         for (int i = 0; i < publication.authors.size(); i++) {
             univState.getWriter().addProperty(Ontology.CS_P_PUBLICATIONAUTHOR, (String) publication.authors.get(i),
                     true);
+
         }
         univState.getWriter().endSection(publication.type);
     }
@@ -496,7 +518,7 @@ class UniversityGenerator implements Runnable {
         }
         if (0 == univState.getRandom(GenerationParameters.R_UNDERSTUD_ADVISOR)) {
             univState.getWriter().addProperty(Ontology.CS_P_ADVISOR, _selectAdvisor(univState), true);
-        }
+        }//TODO make the influencedBy randomic
         univState.getWriter().endSection(Ontology.CS_C_UNDERSTUD);
     }
 
@@ -595,10 +617,8 @@ class UniversityGenerator implements Runnable {
      * @param index Index of the course.
      */
     private void _generateACourse(UniversityState univState, int index) {
-        univState.getWriter().startSection(Ontology.CS_C_COURSE, univState.getId(Ontology.CS_C_COURSE, index));
-        univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(Ontology.CS_C_COURSE, index),
-                false);
-        univState.getWriter().endSection(Ontology.CS_C_COURSE);
+        univState.getWriter().startSection(Ontology.CS_C_RESEARCH, univState.getId(Ontology.CS_C_RESEARCH, index));
+        univState.getWriter().endSection(Ontology.CS_C_RESEARCH);
     }
 
     /**
@@ -625,6 +645,16 @@ class UniversityGenerator implements Runnable {
             _generateAGraduateCourse(univState, ((CourseInfo) univState.getGradCourses().get(i)).globalIndex);
         }
     }
+
+
+    private void _generateAResearch(UniversityState univState, int index) {
+        univState.getWriter().startSection(Ontology.CS_C_RESEARCH, univState.getId(Ontology.CS_C_COURSE, index));
+        univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(Ontology.CS_C_COURSE, index),
+                false);
+        univState.getWriter().endSection(Ontology.CS_C_COURSE);
+    }
+
+    //TODO add type to researches
 
     /**
      * Chooses RAs and TAs from graduate student and generates their instances

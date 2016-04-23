@@ -8,7 +8,7 @@ public class ResearchInfo {
     /** index of the faculty who teaches this course */
     public int indexInFaculty = 0;
     /** index of this course */
-    public int globalIndex = 0;
+    public int globalIndex;
     /** list of authors */
     public ArrayList<String> researchers;
 

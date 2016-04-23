@@ -16,8 +16,9 @@ public class GenerationParameters {
     /** size of the pool of reasearch areas of one department*/
       public static final int RESEARCH_NUM_MIN = 30;
     /** size of the pool of reasearch areas of one department*/
-
      public static final int RESEARCH_NUM_MAX = 90;
+
+
     /** minimum number of departments in a university */
       public static final int DEPT_MIN = 15;
     /** maximum number of departments in a university */
@@ -43,6 +44,10 @@ public class GenerationParameters {
       public static final int LEC_PUB_MIN = 0;
     /** maximum number of publications of a lecturer */
       public static final int LEC_PUB_MAX = 5;
+    /** minimum number of  research topics related to a publication  */
+    public static final int PUB_RES_MIN = 1;
+    /** maximum number of research topics related to a publication */
+    public static final int PUB_RES_MAX = 10;
     /** minimum number of courses taught by a faculty */
       public static final int FACULTY_COURSE_MIN = 1;
     /** maximum number of courses taught by a faculty */
@@ -54,7 +59,7 @@ public class GenerationParameters {
     /** minimum number of research by a professor */
     public static final int PROFESSOR_RESEARCH_MIN = 1;
     /** maximum number of research by a professor */
-    public static final int PROFESSOR_RESEARCH_MAX = 2;
+    public static final int PROFESSOR_RESEARCH_MAX = 5;
     /** minimum number of courses taken by a undergraduate student */
       public static final int UNDERSTUD_COURSE_MIN = 2;
     /** maximum number of courses taken by a undergraduate student */
