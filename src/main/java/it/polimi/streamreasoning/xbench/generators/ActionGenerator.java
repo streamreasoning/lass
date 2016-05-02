@@ -89,7 +89,7 @@ class ActionGenerator {
         int num = univState.getRandomFromRange(min, max);
         for (int i = 0; i < num; i++) {
             int actionType = univState.getRandomFromRange(Ontology.CS_C_MICROPOST, Ontology.CS_C_BLOG_POST);
-            univState.getPublications().add(genAction(univState, actionType, authorClass, authorId,
+            genActionInstance(univState, genAction(univState, actionType, authorClass, authorId,
                     univState.getRandomFromRange(
                             GenerationParameters.REACTION_DEEPNESS_MIN, GenerationParameters.REACTION_DEEPNESS_MAX)));
         }

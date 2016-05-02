@@ -9,11 +9,14 @@ import it.polimi.streamreasoning.xbench.model.ActionModel;
 import it.polimi.streamreasoning.xbench.model.DiscussionLeaderModel;
 import it.polimi.streamreasoning.xbench.model.Ontology;
 import it.polimi.streamreasoning.xbench.writers.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
 
 public class SiteState implements GeneratorCallbackTarget {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SiteState.class);
 
     private final GlobalState state;
 
@@ -80,7 +83,7 @@ public class SiteState implements GeneratorCallbackTarget {
         switch (state.getWriterType()) {
             case OWL:
                 writer = new OwlWriter(this, state.getOntologyUrl());
-                this.streamWriter= new RDFStreamWriter(this, state.getOntologyUrl());
+                this.streamWriter = new RDFStreamWriter(this, state.getOntologyUrl());
                 break;
             case DAML:
                 writer = new DamlWriter(this, state.getOntologyUrl());
@@ -148,9 +151,10 @@ public class SiteState implements GeneratorCallbackTarget {
         return writer;
     }
 
-    public RDFStreamWriter getStreamWriter(){
+    public RDFStreamWriter getStreamWriter() {
         return this.streamWriter;
     }
+
     public String getFilename(int deptIndex) {
         StringBuilder fileName = new StringBuilder();
 
@@ -269,7 +273,7 @@ public class SiteState implements GeneratorCallbackTarget {
                 break;
         }
 
-        return email;
+        return email.toLowerCase();
     }
 
     /**
@@ -433,46 +437,51 @@ public class SiteState implements GeneratorCallbackTarget {
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
             switch (i) {
                 case Ontology.CS_C_SITE:
+                    this.instances[Ontology.CS_C_SITE].num = this.state.getNumberUniversities();
                     break;
                 case Ontology.CS_C_DISCUSSION:
+                    this.instances[Ontology.CS_C_DISCUSSION].num = getRandomFromRange(GenerationParameters.DISCUSSION_MIN,
+                            GenerationParameters.DISCUSSION_MAX);
+                    break;
+                case Ontology.CS_C_PERSON:
+                    this.instances[Ontology.CS_C_PERSON].num = getRandomFromRange(GenerationParameters.PERSON_MIN,
+                            GenerationParameters.PERSON_MAX);
+                    break;
+                case Ontology.CS_C_PARTICIPANT:
+                    break;
+                case Ontology.CS_C_INFLUENCER:
                     break;
                 case Ontology.CS_C_NEWS:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.NEWS_MIN,
-                            GenerationParameters.NEWS_MAX);
+                    this.instances[i].num = new Double(GenerationParameters.R_NEWS_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
                     break;
                 case Ontology.CS_C_COMMERCIAL:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.COMM_MIN,
-                            GenerationParameters.COMM_MAX);
+                    this.instances[i].num = new Double(GenerationParameters.R_COMM_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
                     break;
                 case Ontology.CS_C_VIP:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.VIP_MIN,
-                            GenerationParameters.VIP_MAX);
+                    this.instances[i].num = new Double(GenerationParameters.R_VIP_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
                     break;
                 case Ontology.CS_C_INVOLVED:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.LEC_MIN, GenerationParameters.LEC_MAX);
+                    this.instances[i].num = new Double(GenerationParameters.R_INVOLVED_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
+                    break;
+                case Ontology.CS_C_STAKEHOLDER:
                     break;
                 case Ontology.CS_C_TOPIC_FOLLOWER:
-                    this.instances[i].num = getRandomFromRange(
-                            GenerationParameters.R_UNDERSTUD_FACULTY_MIN * this.instances[Ontology.CS_C_PARTICIPANT].total,
-                            GenerationParameters.R_UNDERSTUD_FACULTY_MAX * this.instances[Ontology.CS_C_PARTICIPANT].total);
+                    this.instances[i].num = new Double(GenerationParameters.R_TOPIC_FOLLOWER_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
                     break;
                 case Ontology.CS_C_TRENDING_TOPIC_FOLLOWER:
-                    this.instances[i].num = getRandomFromRange(
-                            GenerationParameters.R_GRADSTUD_FACULTY_MIN * this.instances[Ontology.CS_C_PARTICIPANT].total,
-                            GenerationParameters.R_GRADSTUD_FACULTY_MAX * this.instances[Ontology.CS_C_PARTICIPANT].total);
+                    this.instances[i].num = new Double(GenerationParameters.R_TRENDING_TOPIC_FOLLOWER_PERSON * this.instances[Ontology.CS_C_PERSON].num).intValue();
                     break;
                 case Ontology.CS_C_EXPERT:
-                    this.instances[i].num = getRandomFromRange(
-                            (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total) / GenerationParameters.R_STKH_EXPT_MAX,
-                            (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total) / GenerationParameters.R_STKH_EXPT_MIN);
+                    this.instances[i].num =
+                            new Double(GenerationParameters.R_EXPERT_PERSON * (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total)).intValue();
                     break;
                 case Ontology.CS_C_ATTENDEE:
-                    this.instances[i].num = getRandomFromRange(
-                            (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total) / GenerationParameters.R_STKH_ATT_MAX,
-                            (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total) / GenerationParameters.R_STKH_ATT_MIN);
+                    this.instances[i].num = new Double(GenerationParameters.R_ATTENDEE_PERSON * (this.instances[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total + this.instances[Ontology.CS_C_TOPIC_FOLLOWER].total)).intValue();
+                    break;
+                case Ontology.CS_C_DISCUSSION_LEADER:
                     break;
                 case Ontology.CS_C_EVENT:
-                    this.instances[i].num = getRandomFromRange(GenerationParameters.EVENT_ATTENDEE_MIN,
+                    this.instances[i].num = getRandomFromRange(GenerationParameters.EVENT_MIN,
                             GenerationParameters.EVENT_MAX);
                     break;
                 case Ontology.CS_C_TAG:
@@ -487,11 +496,32 @@ public class SiteState implements GeneratorCallbackTarget {
                     this.instances[i].num = getRandomFromRange(GenerationParameters.TRENDING_TOPIC_NUM_MIN,
                             GenerationParameters.TRENDING_TOPIC_NUM_MAX);
                     break;
+                case Ontology.CS_C_ACTION:
+                    break;
+                case Ontology.CS_C_POST:
+                    break;
+                case Ontology.CS_C_MEDIAPOST:
+                    break;
+                case Ontology.CS_C_MICROPOST:
+                    break;
+                case Ontology.CS_C_BLOG_POST:
+                    break;
+                case Ontology.CS_C_COMMENT:
+                    break;
+                case Ontology.CS_C_LIKE:
+                    break;
+                case Ontology.CS_C_SHARED_POST:
+                    break;
+                case Ontology.CS_C_REACTION:
+                    break;
+                case Ontology.CS_C_POPULAR_POST:
+                    break;
                 default:
                     this.instances[i].num = Ontology.CLASS_INFO[i][Ontology.INDEX_NUM];
                     break;
             }
             this.instances[i].total = this.instances[i].num;
+            LOGGER.info("CLASS [" + Ontology.CLASS_TOKEN[i] + "] INSTANCES: Expected [" + instances[i].num + "] ");
             subClass = i;
             while ((superClass = Ontology.CLASS_INFO[subClass][Ontology.INDEX_SUPER]) != Ontology.CS_C_NULL) {
                 this.instances[superClass].total += this.instances[i].num;

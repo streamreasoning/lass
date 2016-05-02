@@ -28,7 +28,7 @@ import com.github.rvesse.airline.parser.errors.ParseException;
 import it.polimi.streamreasoning.xbench.writers.ConsolidationMode;
 import it.polimi.streamreasoning.xbench.writers.WriterType;
 
-@Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines")
+@Command(name = "generate.sh", description = "Artificial Data Generator for the LASS Ontology Stream Reasoning query engines")
 @ExitCodes(codes = { 0, 1, 2, 3 }, descriptions = { "Data was generated successfully", "Help was displayed",
         "Invalid arguments", "Error during data generation" })
 public class Launcher {
@@ -40,8 +40,8 @@ public class Launcher {
 
     private static final long DEFAULT_TIMEOUT = 180;
 
-    @Option(name = { "-u",
-            "--univ" }, title = "NumberOfUniversities", arity = 1, description = "Sets the number of universities to generate data for (default 1)")
+    @Option(name = { "-s",
+            "--site" }, title = "NumberOfUniversities", arity = 1, description = "Sets the number of universities to generate data for (default 1)")
     @IntegerRange(min = 1, minInclusive = true)
     private int univNum = 1;
 

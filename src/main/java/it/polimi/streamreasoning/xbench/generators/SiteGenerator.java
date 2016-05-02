@@ -1,10 +1,9 @@
 package it.polimi.streamreasoning.xbench.generators;
 
-import it.polimi.streamreasoning.xbench.state.SiteState;
-import it.polimi.streamreasoning.xbench.generation.GenerationParameters;
+import it.polimi.streamreasoning.xbench.generation.InstanceCount;
 import it.polimi.streamreasoning.xbench.model.Ontology;
+import it.polimi.streamreasoning.xbench.state.SiteState;
 import it.polimi.streamreasoning.xbench.writers.ConsolidationMode;
-import it.polimi.streamreasoning.xbench.writers.RDFStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +21,8 @@ class SiteGenerator implements Runnable {
 
     public SiteGenerator(SiteState univState) {
         this.univState = univState;
+        aGenerator = new ActionGenerator(univState);
+        pGenerator = new PersonGenerator(univState, aGenerator);
     }
 
     public void run() {
@@ -32,6 +33,14 @@ class SiteGenerator implements Runnable {
 
         try {
             _generateSite(this.univState);
+
+            InstanceCount[] instances = univState.getInstances();
+            for (int i = 0; i < Ontology.CLASS_NUM; i++) {
+                LOGGER.info("CLASS [" + Ontology.CLASS_TOKEN[i] + "] INSTANCES: Expected [" + instances[i].num + "] " +
+                        "Count [" + instances[i].count + "]");
+            }
+
+
             this.univState.setComplete();
         } catch (Throwable e) {
             this.univState.setError(e);
@@ -47,18 +56,24 @@ class SiteGenerator implements Runnable {
      * Creates a university.
      */
     private void _generateSite(SiteState univState) {
-        // determine department number
-        univState.getInstances()[Ontology.CS_C_DISCUSSION].num = univState.getRandomFromRange(GenerationParameters.DISCUSSION_MIN,
-                GenerationParameters.DISCUSSION_MAX);
-        univState.getInstances()[Ontology.CS_C_DISCUSSION].count = 0;
-        // generate departments
-
-        aGenerator = new ActionGenerator(univState);
-        pGenerator = new PersonGenerator(univState, aGenerator);
+        univState.resetInstanceInfo();
 
         for (int i = 0; i < univState.getInstances()[Ontology.CS_C_DISCUSSION].num; i++) {
-            _generateDiscussion(univState, i);
+            String filename = univState.getFilename(i);
+            if (i == 0 || univState.getGlobalState().consolidationMode() == ConsolidationMode.None) {
+                univState.getWriter().startFile(filename, univState.getGlobalState());
+                univState.getStreamWriter().startStream(filename);
+                _generateAUniv(univState, univState.getUniversityIndex());
+            }
+
+            _generateDiscussion(univState, i, filename);
+            _generateContent(univState);
+            _genPeople(univState);
+            // _genActions(univState);
+            close(univState, i, filename);
         }
+
+
     }
 
     /**
@@ -68,24 +83,26 @@ class SiteGenerator implements Runnable {
      *              instances[CS_C_SITE].count till generateASection(CS_C_SITE, )
      *              is invoked.
      */
-    private void _generateDiscussion(SiteState univState, int index) {
+    private void _generateDiscussion(SiteState univState, int index, String filename) {
         // Start a new file if we're not consolidating or this is the first
         // department for the university
-        String filename = univState.getFilename(index);
-        if (index == 0 || univState.getGlobalState().consolidationMode() == ConsolidationMode.None) {
-            univState.getWriter().startFile(filename, univState.getGlobalState());
-            univState.getStreamWriter().startStream(filename);
-        }
+        univState.updateCount(Ontology.CS_C_DISCUSSION);
 
-        // reset
-        univState.reset();
+        univState.getWriter().startSection(Ontology.CS_C_DISCUSSION, univState.getId(Ontology.CS_C_DISCUSSION, index));
+        univState.getWriter().addProperty(Ontology.CS_DP_NAME, univState.getRelativeName(Ontology.CS_C_DISCUSSION, index),
+                false);
+        univState.getWriter().addProperty(Ontology.CS_P_SUBCOMMUNITY_OF, Ontology.CS_C_SITE,
+                univState.getId(Ontology.CS_C_SITE, univState.getUniversityIndex()));
+        univState.getWriter().endSection(Ontology.CS_C_DISCUSSION);
 
-        if (index == 0) {
-            _generateASection(univState, Ontology.CS_C_SITE, univState.getUniversityIndex());
-        }
 
-        _generateASection(univState, Ontology.CS_C_DISCUSSION, index);
-        _generateContent(univState);
+    }
+
+    private void _genActions(SiteState univState) {
+        aGenerator.genActionInstances(univState);
+    }
+
+    private void _genPeople(SiteState univState) {
         for (int classType = Ontology.CS_C_DISCUSSION + 1; classType < Ontology.CLASS_NUM; classType++) {
             univState.getInstances()[classType].count = 0;
             for (int instanceIndex = 0; instanceIndex < univState.getInstances()[classType].num; instanceIndex++) {
@@ -94,36 +111,6 @@ class SiteGenerator implements Runnable {
         }
         pGenerator.attendeeInstanceGen(univState);
         pGenerator.expertInstanceGen(univState);
-        aGenerator.genActionInstances(univState);
-
-
-        if (univState.getGlobalState().consolidationMode() != ConsolidationMode.None) {
-            // Consolidating output so file is not yet complete
-            if (!univState.getGlobalState().isQuietMode())
-                System.out.println(filename + " in progress...");
-        }
-        String bar = "";
-        for (int i = 0; i < filename.length(); i++)
-            bar += '-';
-        Generator.LOGGER.info(bar);
-        Generator.LOGGER.info(filename);
-        Generator.LOGGER.info(bar);
-        _generateComments(univState);
-
-        // End the file if we aren't consolidating or this is the last file for
-        // the university
-        if (univState.getGlobalState().consolidationMode() == ConsolidationMode.None
-                || index == univState.getInstances()[Ontology.CS_C_DISCUSSION].num - 1) {
-            if (univState.getGlobalState().consolidationMode() != ConsolidationMode.Full) {
-                System.out.println(filename + " generated");
-            } else {
-                // Consolidating output so file is not yet complete
-                System.out.println(filename + " (Site " + univState.getUniversityIndex() + ") in progress...");
-            }
-            univState.getWriter().endFile(univState.getGlobalState());
-        }
-
-        univState.getStreamWriter().closeStream();
     }
 
     /**
@@ -136,12 +123,6 @@ class SiteGenerator implements Runnable {
         univState.updateCount(classType);
 
         switch (classType) {
-            case Ontology.CS_C_SITE:
-                _generateAUniv(state, index);
-                break;
-            case Ontology.CS_C_DISCUSSION:
-                _discussionInstanceGen(state, index);
-                break;
             case Ontology.CS_C_PARTICIPANT: //used only in recursion
                 pGenerator.participantInstanceGen(state, classType, index);
                 break;
@@ -184,20 +165,6 @@ class SiteGenerator implements Runnable {
     }
 
     /**
-     * Generates a department instance.
-     *
-     * @param index Index of the department.
-     */
-    private void _discussionInstanceGen(SiteState univState, int index) {
-        univState.getWriter().startSection(Ontology.CS_C_DISCUSSION, univState.getId(Ontology.CS_C_DISCUSSION, index));
-        univState.getWriter().addProperty(Ontology.CS_DP_NAME, univState.getRelativeName(Ontology.CS_C_DISCUSSION, index),
-                false);
-        univState.getWriter().addProperty(Ontology.CS_P_SUBCOMMUNITY_OF, Ontology.CS_C_SITE,
-                univState.getId(Ontology.CS_C_SITE, univState.getUniversityIndex()));
-        univState.getWriter().endSection(Ontology.CS_C_DISCUSSION);
-    }
-
-    /**
      * Generates topic/trending topic  instances. These topics are assigned to
      */
     private void _generateContent(SiteState univState) {
@@ -205,18 +172,18 @@ class SiteGenerator implements Runnable {
         List<Integer> topics = univState.getRandomList(univState.getTopicNum(), 0, univState.getTopicNum() - 1);
 
         for (Integer t : topics) {
-            contentInstanceGen(univState, Ontology.CS_C_TOPIC, t.intValue());
+            _contentInstanceGen(univState, Ontology.CS_C_TOPIC, t.intValue());
         }
 
         List<Integer> ttopics = univState.getRandomList(univState.getTrendingTopicNum(), 0, univState.getTrendingTopicNum() - 1);
 
         for (Integer t : ttopics) {
-            contentInstanceGen(univState, Ontology.CS_C_TRENDING_TOPIC, t.intValue());
+            _contentInstanceGen(univState, Ontology.CS_C_TRENDING_TOPIC, t.intValue());
         }
 
         List<Integer> tags = univState.getRandomList(univState.getTagNum(), 0, univState.getTagNum() - 1);
         for (Integer t : tags) {
-            contentInstanceGen(univState, Ontology.CS_C_TAG, t.intValue());
+            _contentInstanceGen(univState, Ontology.CS_C_TAG, t.intValue());
         }
 
         List<Integer> events = univState.getRandomList(univState.getEventNum(), 0, univState.getEventNum() - 1);
@@ -226,7 +193,7 @@ class SiteGenerator implements Runnable {
         }
     }
 
-    private void contentInstanceGen(SiteState univState, int type, int index) {
+    private void _contentInstanceGen(SiteState univState, int type, int index) {
         univState.updateCount(type);
         univState.getWriter().startSection(type, univState.getId(type, index));
         univState.getWriter().endSection(type);
@@ -252,6 +219,38 @@ class SiteGenerator implements Runnable {
         univState.getWriter().endSection(Ontology.CS_C_EVENT);
 
     }
+
+
+    private void close(SiteState univState, int index, String filename) {
+        if (univState.getGlobalState().consolidationMode() != ConsolidationMode.None) {
+            // Consolidating output so file is not yet complete
+            if (!univState.getGlobalState().isQuietMode())
+                System.out.println(filename + " in progress...");
+        }
+        String bar = "";
+        for (int i = 0; i < filename.length(); i++)
+            bar += '-';
+        Generator.LOGGER.info(bar);
+        Generator.LOGGER.info(filename);
+        Generator.LOGGER.info(bar);
+        _generateComments(univState);
+
+        // End the file if we aren't consolidating or this is the last file for
+        // the university
+        if (univState.getGlobalState().consolidationMode() == ConsolidationMode.None
+                || index == univState.getInstances()[Ontology.CS_C_DISCUSSION].num - 1) {
+            if (univState.getGlobalState().consolidationMode() != ConsolidationMode.Full) {
+                System.out.println(filename + " generated");
+            } else {
+                // Consolidating output so file is not yet complete
+                System.out.println(filename + " (Site " + univState.getUniversityIndex() + ") in progress...");
+            }
+            univState.getWriter().endFile(univState.getGlobalState());
+        }
+
+        univState.getStreamWriter().closeStream();
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////
 

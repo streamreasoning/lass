@@ -18,10 +18,14 @@ public class Ontology {
      * Department
      */
     public static final int CS_C_DISCUSSION = CS_C_SITE + 1;
+
+    public static final int CS_C_PERSON = CS_C_DISCUSSION + 1;
+
+    public static final int CS_C_CONTRIBUTOR = CS_C_PERSON + 1;
     /**
      * Faculty
      */
-    public static final int CS_C_PARTICIPANT = CS_C_DISCUSSION + 1;
+    public static final int CS_C_PARTICIPANT = CS_C_CONTRIBUTOR + 1;
     /**
      * Professor
      */
@@ -135,20 +139,21 @@ public class Ontology {
             // the entailment of the ontology
             {2, CS_C_NULL}, // CS_C_SITE
             {1, CS_C_NULL}, // CS_C_DISCUSSION
-            {0, CS_C_NULL}, // CS_C_PARTICIPANT
+            {1, CS_C_NULL}, //CS_C_PERSON
+            {0, CS_C_PERSON}, // CS_C_CONTRIBUTOR
+            {0, CS_C_CONTRIBUTOR}, // CS_C_PARTICIPANT
             {0, CS_C_PARTICIPANT}, // CS_C_INFLUENCER
             {0, CS_C_INFLUENCER}, // CS_C_NEWS
             {0, CS_C_INFLUENCER}, // CS_C_COMMERCIAL
             {0, CS_C_INFLUENCER}, // CS_C_VIP
             {0, CS_C_PARTICIPANT}, // CS_C_INVOLVED
-            {0, CS_C_NULL}, // CS_C_STAKEHOLDER
+            {0, CS_C_PERSON}, // CS_C_STAKEHOLDER
             {0, CS_C_STAKEHOLDER}, // CS_C_TOPIC_FOLLOWER
             {0, CS_C_STAKEHOLDER}, // CS_C_TRENDING_TOPIC_FOLLOWER
-            {0, CS_C_NULL}, // CS_C_EXPERT
-            {0, CS_C_NULL}, // CS_C_ATTENDEE
-
-            {0, CS_C_NULL}, // CS_C_DISCUSSION_LEADER
-            {0, CS_C_NULL}, // CS_C_TOPIC, treated as undergrad course here
+            {0, CS_C_PERSON}, // CS_C_EXPERT
+            {0, CS_C_CONTRIBUTOR}, // CS_C_ATTENDEE
+            {0, CS_C_INFLUENCER}, // CS_C_DISCUSSION_LEADER
+            {0, CS_C_NULL}, // CS_C_TOPIC
             {0, CS_C_NULL}, // CS_C_TRENDING_TOPIC
             {0, CS_C_NULL}, // CS_C_TAG
             {0, CS_C_NULL}, // CS_C_EVENT
@@ -166,8 +171,11 @@ public class Ontology {
     /**
      * class name strings
      */
-    public static final String[] CLASS_TOKEN = {"Site", // CS_C_SITE
+    public static final String[] CLASS_TOKEN = {
+            "Site", // CS_C_SITE
             "Discussion", // CS_C_DISCUSSION
+            "User   ", //CS_C_PERSON
+            "Contributor",//CS_C_CONTRIBUTOR
             "Participant", // CS_C_PARTICIPANT
             "Influencer", // CS_C_INFLUENCER
             "News", // CS_C_NEWS
@@ -340,7 +348,6 @@ public class Ontology {
             "hasEventTag", //CS_P_HAS_EVENT_TAG
             "isFollowedBy", //CS_P_IS_FOLLOWED_BY
             "listedTopic",//CS_P_LISTED_TOPIC
-
             "emailAddress", //CS_DP_EMAIL
             "followersNumber",//CS_DP_FOLLOWERS_NUM
             "followingNumber", //CS_DP_RESEARCH_INTEREST

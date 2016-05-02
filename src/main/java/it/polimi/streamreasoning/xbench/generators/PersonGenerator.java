@@ -1,19 +1,19 @@
 package it.polimi.streamreasoning.xbench.generators;
 
-import it.polimi.streamreasoning.xbench.state.SiteState;
 import it.polimi.streamreasoning.xbench.generation.GenerationParameters;
 import it.polimi.streamreasoning.xbench.model.Ontology;
+import it.polimi.streamreasoning.xbench.state.SiteState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 class PersonGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonGenerator.class);
 
     private final SiteState univState;
     private final ActionGenerator aGen;
+
     public PersonGenerator(SiteState univState, ActionGenerator gen) {
         this.univState = univState;
         this.aGen = gen;
@@ -31,7 +31,25 @@ class PersonGenerator {
                 univState.getId(Ontology.CS_C_SITE, univState.getRandom(GenerationParameters.SITES)));
 
         univState.getWriter().addProperty(Ontology.CS_DP_EMAIL, univState.getEmail(type, index), false);
-        univState.getWriter().addProperty(Ontology.CS_DP_FOLLOWERS_NUM, "xxx-xxx-xxxx", false);
+
+        int followersNum = 0;
+        switch (type) {
+            case Ontology.CS_C_NEWS:
+                followersNum = univState.getRandomFromRange(GenerationParameters.NEWS_FOLLOWER_NUM_MIN, GenerationParameters.NEWS_FOLLOWER_NUM_MAX);
+                break;
+            case Ontology.CS_C_VIP:
+                followersNum = univState.getRandomFromRange(GenerationParameters.VIP_FOLLOWER_NUM_MIN, GenerationParameters.VIP_FOLLOWER_NUM_MAX);
+                break;
+            case Ontology.CS_C_COMMERCIAL:
+                followersNum = univState.getRandomFromRange(GenerationParameters.COM_FOLLOWER_NUM_MIN, GenerationParameters.COM_FOLLOWER_NUM_MAX);
+                break;
+            default:
+                followersNum = univState.getRandomFromRange(GenerationParameters.PEEP_FOLLOWER_NUM_MIN, GenerationParameters.PEEP_FOLLOWER_NUM_MAX);
+                break;
+        }
+
+        univState.getWriter().addProperty(Ontology.CS_DP_FOLLOWERS_NUM, followersNum + "", false);
+
         univState.getWriter().addProperty(Ontology.CS_DP_NAME, univState.getRelativeName(type, index), false);
 
         if (univState.getBoolean()) {
@@ -45,27 +63,16 @@ class PersonGenerator {
      * Generates a TA instance according to the specified information.
      */
     public void expertInstanceGen(SiteState univState) {
-
-        int size = univState.getInstances()[Ontology.CS_C_EXPERT].total;
-        int startingIndex = 0;
-        int finishingIndex = univState.getInstances()[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total +
-                univState.getInstances()[Ontology.CS_C_TOPIC_FOLLOWER].total - 1;
-
-        List<Integer> ttopicFollowers = selectRandomInstances(univState, size, startingIndex, finishingIndex);
-
-        size = univState.getInstances()[Ontology.CS_C_EXPERT].total;
-        finishingIndex = univState.getTopicNum() - 1;
-
-        List<Integer> topics = selectRandomInstances(univState, size, startingIndex, finishingIndex);
-
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < univState.getInstances()[Ontology.CS_C_EXPERT].total; i++) {
             int expertClass = univState.getRandomFromRange(Ontology.CS_C_TOPIC_FOLLOWER, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER);
+            int expert = univState.getRandom(univState.getInstances()[expertClass].total - 1);
             int expertiseClass = univState.getRandomFromRange(Ontology.CS_C_TOPIC, Ontology.CS_C_TRENDING_TOPIC);
-            univState.getWriter().startAboutSection(Ontology.CS_C_EXPERT, univState.getId(expertClass, ttopicFollowers.get(i)));
-            univState.getWriter().addProperty(Ontology.CS_P_EXPERT_IN, univState.getId(expertiseClass, topics.get(i)), true);
+            int expertise = univState.getRandom(univState.getInstances()[expertiseClass].total - 1);
+
+            univState.getWriter().startAboutSection(Ontology.CS_C_EXPERT, univState.getId(expertClass, expert));
+            univState.getWriter().addProperty(Ontology.CS_P_EXPERT_IN, univState.getId(expertiseClass, expertise), true);
             univState.getWriter().endSection(Ontology.CS_C_EXPERT);
         }
-
     }
 
     private void contributorInstanceGen(SiteState univState, int type, int index) {
@@ -102,9 +109,6 @@ class PersonGenerator {
         int size = univState.getInstances()[Ontology.CS_C_ATTENDEE].total;
         int startingIndex = 0;
 
-        List<Integer> topicFollowers = selectRandomInstances(univState, size, startingIndex, univState.getInstances()[Ontology.CS_C_TRENDING_TOPIC_FOLLOWER].total - 1);
-        List<Integer> ttFollowers = selectRandomInstances(univState, size, startingIndex, univState.getInstances()[Ontology.CS_C_TOPIC_FOLLOWER].total - 1);
-
         int eventNum = univState.getEventNum();
 
         for (int e = 0; e < eventNum; e++) {
@@ -119,7 +123,7 @@ class PersonGenerator {
 
             int ttatt = univState.getRandomFromRange(GenerationParameters.EVENT_ATTENDEE_MIN, GenerationParameters.EVENT_ATTENDEE_MAX);
 
-            for (int ttf = 0; ttf < tf_att; ttf++) {
+            for (int ttf = 0; ttf < ttatt; ttf++) {
                 univState.getWriter().startAboutSection(Ontology.CS_C_ATTENDEE, univState.getId(Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, ttf));
                 univState.getWriter().addProperty(Ontology.CS_P_PARTICIPATES, univState.getId(Ontology.CS_C_EVENT, e), true);
                 univState.getWriter().endSection(Ontology.CS_C_ATTENDEE);
@@ -164,7 +168,7 @@ class PersonGenerator {
      */
     public void involvedInstanceGen(SiteState univState, int index) {
         participantInstanceGen(univState, Ontology.CS_C_INVOLVED, index);
-        aGen.assignActions(univState, index, Ontology.CS_C_INVOLVED, GenerationParameters.LEC_PUB_MIN, GenerationParameters.LEC_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_INVOLVED, GenerationParameters.ACTION_MIN, GenerationParameters.ACTION_MAX);
     }
 
     /**
@@ -186,8 +190,8 @@ class PersonGenerator {
      */
     public void newsInstanceGen(SiteState univState, int index) {
         influencerInstanceGen(univState, Ontology.CS_C_NEWS, index);
-        aGen.assignActions(univState, index, Ontology.CS_C_NEWS, GenerationParameters.FULLPROF_PUB_MIN,
-                GenerationParameters.FULLPROF_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_NEWS, GenerationParameters.ACTION_MIN,
+                GenerationParameters.ACTION_MAX);
     }
 
     /**
@@ -197,8 +201,8 @@ class PersonGenerator {
      */
     public void comInstanceGen(SiteState univState, int index) {
         influencerInstanceGen(univState, Ontology.CS_C_COMMENT, index);
-        aGen.assignActions(univState, index, Ontology.CS_C_COMMENT, GenerationParameters.ASSOPROF_PUB_MIN,
-                GenerationParameters.ASSOPROF_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_COMMENT, GenerationParameters.ACTION_MIN,
+                GenerationParameters.ACTION_MAX);
     }
 
     /**
@@ -208,8 +212,8 @@ class PersonGenerator {
      */
     public void vipInstanceGen(SiteState univState, int index) {
         influencerInstanceGen(univState, Ontology.CS_C_VIP, index);
-        aGen.assignActions(univState, index, Ontology.CS_C_VIP, GenerationParameters.ASSTPROF_PUB_MIN,
-                GenerationParameters.ASSTPROF_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_VIP, GenerationParameters.ACTION_MIN,
+                GenerationParameters.ACTION_MAX);
     }
 
     //SUB CLASSES OF STAKEHOLDER
@@ -224,7 +228,7 @@ class PersonGenerator {
         univState.getWriter().startSection(Ontology.CS_C_TOPIC_FOLLOWER, univState.getId(Ontology.CS_C_TOPIC_FOLLOWER, index));
         this.stakeholderInstanceGen(univState, Ontology.CS_C_TOPIC_FOLLOWER, index);
 
-        int n = univState.getRandomFromRange(GenerationParameters.UNDERSTUD_COURSE_MIN, GenerationParameters.UNDERSTUD_COURSE_MAX);
+        int n = univState.getRandomFromRange(GenerationParameters.FOLLOWED_TOPIC_MIN, GenerationParameters.FOLLOWED_TOPIC_MAX);
         ArrayList<Integer> topics = univState.getRandomList(n, 0, univState.getTopicNum() - 1);
 
         for (Integer i : topics) {
@@ -235,8 +239,8 @@ class PersonGenerator {
         univState.getWriter().endSection(Ontology.CS_C_TOPIC_FOLLOWER);
 
 
-        aGen.assignActions(univState, index, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, GenerationParameters.GRADSTUD_PUB_MIN,
-                GenerationParameters.GRADSTUD_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, GenerationParameters.ACTION_MIN,
+                GenerationParameters.ACTION_MAX);
     }
 
     /**
@@ -247,8 +251,8 @@ class PersonGenerator {
     public void trendingTopicFollowerInstanceGen(SiteState univState, int index) {
         univState.getWriter().startSection(Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, univState.getId(Ontology.CS_C_TOPIC_FOLLOWER, index));
         stakeholderInstanceGen(univState, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, index);
-        int n = univState.getRandomFromRange(GenerationParameters.GRADSTUD_COURSE_MIN,
-                GenerationParameters.GRADSTUD_COURSE_MAX);
+        int n = univState.getRandomFromRange(GenerationParameters.FOLLOWED_TT_MIN,
+                GenerationParameters.FOLLOWED_TT_MAX);
         ArrayList<Integer> tt = univState.getRandomList(n, 0, univState.getTrendingTopicNum() - 1);
 
         for (Integer i : tt) {
@@ -258,8 +262,8 @@ class PersonGenerator {
 
         univState.getWriter().endSection(Ontology.CS_C_TRENDING_TOPIC_FOLLOWER);
 
-        aGen.assignActions(univState, index, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, GenerationParameters.GRADSTUD_PUB_MIN,
-                GenerationParameters.GRADSTUD_PUB_MAX);
+        aGen.assignActions(univState, index, Ontology.CS_C_TRENDING_TOPIC_FOLLOWER, GenerationParameters.ACTION_MIN,
+                GenerationParameters.ACTION_MAX);
     }
 
 
@@ -277,8 +281,4 @@ class PersonGenerator {
         return univState.getId(profType, index);
     }
 
-    //UTILS
-    private List<Integer> selectRandomInstances(SiteState state, int size, int lower, int upper) {
-        return state.getRandomList(size, lower, upper);
-    }
 }

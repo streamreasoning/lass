@@ -27,10 +27,6 @@ public class ActionModel {
     public Integer[] topics;
     public Integer[] ttopics;
 
-    public Integer[] likes;
-    public Integer[] shares;
-    public Integer[] comments;
-
     public ActionModel reactionTo;
 
     public boolean isReaction() {
